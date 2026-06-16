@@ -21,7 +21,7 @@ export default function Show({ license, activations, logs }) {
 
     const handleStatusChange = (status) => {
         patch(route('licenses.status', license.uuid), {
-            data: { status },
+            status,
         });
     };
 
