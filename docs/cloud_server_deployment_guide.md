@@ -277,17 +277,21 @@ Follow the interactive prompts:
 
 ---
 
-### 6. Configuring Host Nginx & Let's Encrypt SSL
+### 6. Configuring Host Nginx & SSL
 
-Nginx will receive HTTPS connections on port 443, terminate SSL/TLS, and proxy requests to the local PHP-FPM socket.
+Nginx will receive HTTPS connections, terminate SSL/TLS, and proxy requests to the local PHP-FPM socket.
 
 #### Step 6.1: Disable Default Site Configuration
 ```bash
 sudo rm /etc/nginx/sites-enabled/default
 ```
 
-#### Step 6.2: Create Site Configuration Block
-Create a configuration file:
+#### Step 6.2: Configure SSL & Nginx Server Block
+
+Depending on whether you are using a Domain Name or a raw IP address, follow the appropriate sub-steps:
+
+##### Option A: Deploying with a Domain Name (Let's Encrypt SSL)
+Create the configuration file:
 ```bash
 sudo nano /etc/nginx/sites-available/global-license-manager
 ```
@@ -335,16 +339,85 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-#### Step 6.3: Let's Encrypt SSL Configuration with Certbot
-Install Certbot and the Nginx plugin:
+Install Certbot and obtain the SSL certificate:
 ```bash
 sudo apt install certbot python3-certbot-nginx -y
-```
-Obtain and configure the SSL certificate:
-```bash
 sudo certbot --nginx -d license.yourdomain.com
 ```
-Follow the interactive prompts to automatically redirect HTTP traffic to HTTPS.
+Follow the interactive prompts to automatically configure SSL and redirect HTTP traffic to HTTPS.
+
+##### Option B: Deploying with a Raw IP Address (Self-Signed SSL)
+Since Let's Encrypt does not issue free certificates for raw IP addresses, you must generate a self-signed SSL certificate on the server.
+
+1. Generate a self-signed SSL certificate:
+```bash
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/nginx-selfsigned.key \
+  -out /etc/ssl/certs/nginx-selfsigned.crt \
+  -subj "/CN=34.132.211.60"
+```
+
+2. Create the configuration file:
+```bash
+sudo nano /etc/nginx/sites-available/global-license-manager
+```
+Paste the following configuration configured for the IP address `34.132.211.60`:
+```nginx
+server {
+    listen 80;
+    server_name 34.132.211.60;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name 34.132.211.60;
+
+    ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+    # Safe SSL protocols and settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    root /var/www/global-license-manager/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock; # Match your PHP version socket path (e.g. php8.4-fpm.sock for PHP 8.4)
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+3. Enable the configuration:
+```bash
+sudo ln -s /etc/nginx/sites-available/global-license-manager /etc/nginx/sites-enabled/
+```
+Verify syntax and restart Nginx:
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
 
 ---
 
@@ -429,9 +502,10 @@ Add the following line at the bottom:
 Ensure your license keys, active issued licenses, and system settings are backed up.
 
 #### Step 10.1: Create Backup Script
-Create a script at `/home/licenseadm/backup_license_manager.sh`:
+Ensure the directory exists and create the script:
 ```bash
-nano /home/licenseadm/backup_license_manager.sh
+sudo mkdir -p /home/licenseadm
+sudo nano /home/licenseadm/backup_license_manager.sh
 ```
 Add the following script (replace credentials with your production configurations):
 ```bash
