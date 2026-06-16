@@ -93,18 +93,55 @@ sudo ufw enable
 ### 2. Installing System Packages (PHP, Nginx, MySQL, Node, Composer)
 
 #### Step 2.1: Add PHP Ondřej Surý Repository
-Add the repository to install PHP 8.3/8.4 and necessary extensions:
+Add the repository to install PHP 8.3/8.4 and necessary extensions.
+
+> [!NOTE]
+> Ondřej Surý packages are hosted on Launchpad PPAs for **Ubuntu**, but on `packages.sury.org` for **Debian**. Since PPAs are not natively supported on Debian, adding an Ubuntu PPA on a Debian machine will result in `404 Not Found` repository release errors. Follow the instructions below based on your server's operating system.
+
+##### Option A: For Ubuntu (22.04 LTS / 24.04 LTS)
+If you are running Ubuntu, install dependencies and add the PPA:
 ```bash
-sudo apt install -y software-properties-common
+sudo apt update
+sudo apt install -y software-properties-common python3-launchpadlib
 sudo add-apt-repository ppa:ondrej/php -y
 sudo apt update
 ```
+*(Note: Installing `python3-launchpadlib` prevents potential `AttributeError: 'NoneType' object has no attribute 'people'` tracebacks during repository configuration on minimal installations).*
+
+##### Option B: For Debian (Debian 12 Bookworm)
+If you are running Debian, add the key and source configuration from the official Debian repository:
+```bash
+# 1. Install prerequisites
+sudo apt update
+sudo apt install -y apt-transport-https lsb-release ca-certificates curl gnupg2
+
+# 2. Add GPG keyring and source list
+curl -fsSL https://packages.sury.org/php/apt.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/sury-php.gpg
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
+
+# 3. Update packages index
+sudo apt update
+```
+
+> [!IMPORTANT]
+> **PPA Cleanup:** If you previously attempted to add the Ubuntu PPA on a Debian server and encountered errors, you must clean up the broken source entry before running `apt update`, otherwise the update process will fail:
+> ```bash
+> sudo rm -f /etc/apt/sources.list.d/ondrej-ubuntu-php-*.list
+> ```
 
 #### Step 2.2: Install PHP & Extensions
-Install PHP 8.3 (or 8.4) along with required extensions, specifically `sodium` for cryptographic Ed25519 signing:
+Install your preferred PHP version along with the required extensions:
+
+##### Option A: PHP 8.3
 ```bash
-sudo apt install -y php8.3-fpm php8.3-cli php8.3-mysql php8.3-sqlite3 php8.3-curl php8.3-mbstring php8.3-xml php8.3-zip php8.3-sodium php8.3-gd php8.3-intl
+sudo apt install -y php8.3-fpm php8.3-cli php8.3-common php8.3-mysql php8.3-sqlite3 php8.3-curl php8.3-mbstring php8.3-xml php8.3-zip php8.3-gd php8.3-intl
 ```
+
+##### Option B: PHP 8.4
+```bash
+sudo apt install -y php8.4-fpm php8.4-cli php8.4-common php8.4-mysql php8.4-sqlite3 php8.4-curl php8.4-mbstring php8.4-xml php8.4-zip php8.4-gd php8.4-intl
+```
+
 Verify the installation:
 ```bash
 php -v
@@ -181,7 +218,7 @@ sudo mysql -u root
 Create a new database and a secure database user:
 ```sql
 CREATE DATABASE global_license_manager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'glm_user'@'localhost' IDENTIFIED BY 'your_secure_db_password_here';
+CREATE USER 'glm_user'@'localhost' IDENTIFIED BY 'Arth@1992';
 GRANT ALL PRIVILEGES ON global_license_manager.* TO 'glm_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
@@ -213,6 +250,12 @@ Run the command on your server terminal:
 php artisan app:install
 ```
 
+> [!TIP]
+> If you wish to skip installing Node dependencies and compiling Vite assets (e.g., in CI environments or if you compile assets separately), you can append the `--no-assets` flag:
+> ```bash
+> php artisan app:install --no-assets
+> ```
+
 #### Step 5.3: Wizard Setup Prompts
 Follow the interactive prompts:
 1. **Requirements Check**: The script verifies that PHP, `ext-sodium`, `ext-pdo_mysql`, and directories are writable.
@@ -230,7 +273,7 @@ Follow the interactive prompts:
    > Copy the outputted **`LICENSE_PUBLIC_KEY`**! You must paste this key into the `.env` file of all **Global Admission Manager (GAM)** client installations so they can decrypt and verify signatures. The **Private Key** must remain secret and stays only on this server.
 8. **Admin User**: Setup the initial email and password for the Web Portal.
 9. **Production Optimizations**: Compiles caches for configuration, routes, and views.
-10. **Frontend Assets**: Installs npm dependencies and builds Vite assets using `npm run build`.
+10. **Frontend Assets**: Installs npm dependencies (using `npm ci` if `package-lock.json` is present for faster builds) and builds Vite assets using `npm run build`. You can confirm or skip this interactively, and the command streams build output in real-time. If the `--no-assets` flag is passed, this entire step is skipped.
 
 ---
 
@@ -271,7 +314,7 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock; # Ensure this matches your PHP-FPM version socket path
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock; # Match your PHP version socket path (e.g. php8.4-fpm.sock for PHP 8.4)
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }

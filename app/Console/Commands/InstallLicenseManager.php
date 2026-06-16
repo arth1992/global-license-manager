@@ -8,10 +8,11 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Process;
 
 class InstallLicenseManager extends Command
 {
-    protected $signature = 'app:install';
+    protected $signature = 'app:install {--no-assets : Skip installing Node dependencies and building Vite assets}';
 
     protected $description = 'Interactive server deployment wizard for Global License Manager';
 
@@ -375,24 +376,44 @@ class InstallLicenseManager extends Command
     {
         $this->info('🎨  Frontend Assets');
 
+        if ($this->option('no-assets')) {
+            $this->line('  Skipping asset installation and compilation (--no-assets passed).');
+            $this->newLine();
+            return;
+        }
+
+        if (! $this->confirm('  Do you want to install Node dependencies and build Vite assets?', true)) {
+            $this->line('  Skipping asset build step.');
+            $this->newLine();
+            return;
+        }
+
         if (! File::exists(base_path('node_modules'))) {
             $this->line('  Installing Node dependencies...');
-            exec('npm install 2>&1', $output, $code);
+            $command = File::exists(base_path('package-lock.json')) ? 'npm ci' : 'npm install';
+            $this->line("  Running command: {$command}");
 
-            if ($code !== 0) {
-                $this->warn('  npm install failed. Run "npm install && npm run build" manually.');
+            $result = Process::forever()->path(base_path())->run($command, function (string $type, string $buffer) {
+                $this->output->write($buffer);
+            });
+
+            if (! $result->successful()) {
+                $this->warn("  {$command} failed. Run \"{$command} && npm run build\" manually.");
                 $this->newLine();
-
                 return;
             }
         }
 
         if (! File::exists(public_path('build'))) {
             $this->line('  Building Vite assets...');
-            exec('npm run build 2>&1', $output, $code);
+            $this->line('  Running command: npm run build');
 
-            if ($code !== 0) {
-                $this->warn('  npm build failed. Run "npm run build" manually.');
+            $result = Process::forever()->path(base_path())->run('npm run build', function (string $type, string $buffer) {
+                $this->output->write($buffer);
+            });
+
+            if (! $result->successful()) {
+                $this->warn('  npm run build failed. Run "npm run build" manually.');
             } else {
                 $this->line('  <fg=green>✓ Assets built successfully.</>');
             }
