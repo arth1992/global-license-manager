@@ -20,6 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/licenses/{license}', [DashboardController::class, 'show'])->name('licenses.show');
     Route::post('/licenses/{license}/generate-key', [DashboardController::class, 'generateKey'])->name('licenses.generate-key');
     Route::patch('/licenses/{license}/status', [DashboardController::class, 'updateStatus'])->name('licenses.status');
+    Route::post('/licenses/{license}/reset', [DashboardController::class, 'reset'])->name('licenses.reset');
+    Route::delete('/licenses/{license}', [DashboardController::class, 'destroy'])->name('licenses.destroy');
 });
 
 Route::middleware('auth')->group(function () {

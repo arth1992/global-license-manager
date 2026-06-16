@@ -285,4 +285,44 @@ class DashboardController extends Controller
         return redirect()->back()
             ->with('success', "License status updated to '{$newStatus}' successfully.");
     }
+
+    /**
+     * Delete the entire license record and client details.
+     */
+    public function destroy(License $license): RedirectResponse
+    {
+        $license->logs()->delete();
+        $license->activationRequests()->delete();
+        
+        $clientName = $license->client_name;
+        $license->delete();
+
+        return redirect()->route('licenses.index')
+            ->with('success', "Client '{$clientName}' and all associated license records deleted successfully.");
+    }
+
+    /**
+     * Reset the license key and bound properties (fingerprint, domain, activated_at), setting status to pending.
+     */
+    public function reset(License $license, Request $request): RedirectResponse
+    {
+        $license->update([
+            'license_key'  => null,
+            'fingerprint'  => null,
+            'domain'       => null,
+            'activated_at' => null,
+            'status'       => 'pending',
+        ]);
+
+        $license->log(
+            event: 'reset',
+            ip: $request->ip(),
+            fingerprint: null,
+            success: true,
+            notes: 'License key, bound fingerprint, and domain reset by administrator.'
+        );
+
+        return redirect()->back()
+            ->with('success', 'License key and machine bindings reset successfully.');
+    }
 }

@@ -5,6 +5,8 @@ import { useState } from 'react';
 export default function Show({ license, activations, logs }) {
     const [copied, setCopied] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
+    const [resettingLicense, setResettingLicense] = useState(false);
+    const [deletingClient, setDeletingClient] = useState(false);
 
     const { post, processing: generatingKey } = useForm();
 
@@ -23,6 +25,28 @@ export default function Show({ license, activations, logs }) {
         router.patch(route('licenses.status', license.uuid), { status }, {
             onStart: () => setUpdatingStatus(true),
             onFinish: () => setUpdatingStatus(false),
+        });
+    };
+
+    const handleResetLicense = () => {
+        if (!confirm('Are you sure you want to delete this client\'s license key and clear all machine/domain fingerprint bindings? This will reset the status to pending and force the client to reactivate.')) {
+            return;
+        }
+
+        router.post(route('licenses.reset', license.uuid), {}, {
+            onStart: () => setResettingLicense(true),
+            onFinish: () => setResettingLicense(false),
+        });
+    };
+
+    const handleDeleteClient = () => {
+        if (!confirm('WARNING: Are you sure you want to completely delete this client and all associated license records, daily ping logs, and activation handshakes? This action is permanent and cannot be undone.')) {
+            return;
+        }
+
+        router.delete(route('licenses.destroy', license.uuid), {
+            onStart: () => setDeletingClient(true),
+            onFinish: () => setDeletingClient(false),
         });
     };
 
@@ -215,6 +239,41 @@ export default function Show({ license, activations, logs }) {
                                         </button>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+
+                        {/* Danger Zone Panel */}
+                        <div className="rounded-xl border border-rose-950 bg-rose-950/10 shadow-sm overflow-hidden">
+                            <div className="border-b border-rose-950 bg-rose-950/20 px-6 py-4">
+                                <h3 className="font-bold text-rose-400 text-base">Danger Zone</h3>
+                            </div>
+                            <div className="p-6 space-y-4 text-sm">
+                                <div>
+                                    <h4 className="font-semibold text-slate-200">Reset Machine Bindings & Key</h4>
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        This will delete the cryptographic license key, and clear all domain and hardware fingerprint bindings. The client status resets to "pending" and they must reactivate.
+                                    </p>
+                                    <button
+                                        onClick={handleResetLicense}
+                                        disabled={resettingLicense}
+                                        className="mt-3 inline-flex items-center justify-center rounded-lg border border-amber-800 bg-amber-950/25 hover:bg-amber-900/40 px-3 py-1.5 text-xs font-semibold text-amber-400 transition-all focus:outline-none"
+                                    >
+                                        {resettingLicense ? 'Resetting...' : 'Reset License Key & Bindings'}
+                                    </button>
+                                </div>
+                                <div className="border-t border-rose-950/40 pt-4">
+                                    <h4 className="font-semibold text-slate-200">Delete Client Entirely</h4>
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        Permanently delete this client, their license key record, all logs, and activation handshakes from the central manager. This action cannot be undone.
+                                    </p>
+                                    <button
+                                        onClick={handleDeleteClient}
+                                        disabled={deletingClient}
+                                        className="mt-3 inline-flex items-center justify-center rounded-lg bg-rose-700 hover:bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition-all focus:outline-none shadow-md shadow-rose-900/30"
+                                    >
+                                        {deletingClient ? 'Deleting...' : 'Delete Client & Data'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
