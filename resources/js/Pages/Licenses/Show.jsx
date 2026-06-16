@@ -1,12 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function Show({ license, activations, logs }) {
     const [copied, setCopied] = useState(false);
+    const [updatingStatus, setUpdatingStatus] = useState(false);
 
     const { post, processing: generatingKey } = useForm();
-    const { patch, processing: updatingStatus } = useForm();
 
     const handleCopyKey = () => {
         if (!license.license_key) return;
@@ -20,8 +20,9 @@ export default function Show({ license, activations, logs }) {
     };
 
     const handleStatusChange = (status) => {
-        patch(route('licenses.status', license.uuid), {
-            status,
+        router.patch(route('licenses.status', license.uuid), { status }, {
+            onStart: () => setUpdatingStatus(true),
+            onFinish: () => setUpdatingStatus(false),
         });
     };
 
