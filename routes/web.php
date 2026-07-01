@@ -22,6 +22,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/licenses/{license}/status', [DashboardController::class, 'updateStatus'])->name('licenses.status');
     Route::post('/licenses/{license}/reset', [DashboardController::class, 'reset'])->name('licenses.reset');
     Route::delete('/licenses/{license}', [DashboardController::class, 'destroy'])->name('licenses.destroy');
+    
+    // Invoices & Billing
+    Route::get('/invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::post('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::put('/licenses/{license}/billing', [\App\Http\Controllers\InvoiceController::class, 'updateBilling'])->name('licenses.billing.update');
 });
 
 Route::middleware('auth')->group(function () {

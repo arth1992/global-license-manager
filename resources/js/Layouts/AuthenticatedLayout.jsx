@@ -47,6 +47,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Licenses
                                 </NavLink>
+                                <NavLink
+                                    href={route('invoices.index')}
+                                    active={route().current('invoices.*')}
+                                    className="text-slate-300 hover:text-indigo-400 active:text-indigo-400"
+                                >
+                                    Invoices
+                                </NavLink>
                             </div>
                         </div>
 
@@ -161,6 +168,13 @@ export default function AuthenticatedLayout({ header, children }) {
                             className="text-slate-300 hover:text-indigo-400"
                         >
                             Licenses
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('invoices.index')}
+                            active={route().current('invoices.*')}
+                            className="text-slate-300 hover:text-indigo-400"
+                        >
+                            Invoices
                         </ResponsiveNavLink>
                     </div>
 
