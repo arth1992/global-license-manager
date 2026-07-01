@@ -5,14 +5,14 @@
     <title>Invoice {{ $invoice->invoice_number }}</title>
     <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.5; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
-        .header h1 { margin: 0; color: #0f172a; font-size: 28px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid {{ $settings->brand_color ?? '#e2e8f0' }}; padding-bottom: 20px; }
+        .header h1 { margin: 0; color: {{ $settings->brand_color ?? '#0f172a' }}; font-size: 28px; }
         .meta-info { margin-bottom: 40px; display: table; width: 100%; }
         .meta-info .col { display: table-cell; width: 50%; }
         .meta-info .col h3 { margin-top: 0; color: #475569; font-size: 14px; text-transform: uppercase; }
         .table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .table th { background-color: #f8fafc; color: #475569; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        .table th { background-color: {{ $settings->brand_color ?? '#f8fafc' }}; color: {{ $settings->brand_color ? '#ffffff' : '#475569' }}; font-weight: bold; text-transform: uppercase; font-size: 12px; }
         .text-right { text-align: right !important; }
         .summary { width: 50%; float: right; }
         .summary-row { display: table; width: 100%; margin-bottom: 10px; }
@@ -28,7 +28,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>Global Admission Manager</h1>
+        @if(isset($settings->logo_url) && $settings->logo_url)
+            <img src="{{ storage_path('app/public/' . $settings->logo_url) }}" alt="Logo" style="max-height: 80px; margin-bottom: 15px;">
+        @else
+            <h1>Global Admission Manager</h1>
+        @endif
         <p>License Billing Invoice</p>
     </div>
 
@@ -61,16 +65,17 @@
                 <td class="text-right">₹{{ number_format($invoice->base_fee, 2) }}</td>
             </tr>
             @if($invoice->applicant_count > 0)
+                @php $rate = $invoice->applicant_fee / $invoice->applicant_count; @endphp
                 @if(is_array($invoice->school_breakdown) && count($invoice->school_breakdown) > 0)
                     @foreach($invoice->school_breakdown as $school)
                         <tr>
-                            <td>Applicant Usage - {{ $school['name'] ?? 'School' }} ({{ $school['applicants'] ?? 0 }} applicants @ ₹200)</td>
-                            <td class="text-right">₹{{ number_format(($school['applicants'] ?? 0) * 200, 2) }}</td>
+                            <td>Applicant Usage - {{ $school['name'] ?? 'School' }} ({{ $school['applicants'] ?? 0 }} applicants @ ₹{{ number_format($rate, 2) }})</td>
+                            <td class="text-right">₹{{ number_format(($school['applicants'] ?? 0) * $rate, 2) }}</td>
                         </tr>
                     @endforeach
                 @else
                     <tr>
-                        <td>Active Applicant Usage ({{ $invoice->applicant_count }} applicants @ ₹200)</td>
+                        <td>Active Applicant Usage ({{ $invoice->applicant_count }} applicants @ ₹{{ number_format($rate, 2) }})</td>
                         <td class="text-right">₹{{ number_format($invoice->applicant_fee, 2) }}</td>
                     </tr>
                 @endif

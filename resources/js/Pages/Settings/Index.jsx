@@ -7,6 +7,8 @@ export default function Index({ auth, settings }) {
         razorpay_key_id: settings?.razorpay_key_id || '',
         razorpay_key_secret: settings?.razorpay_key_secret || '',
         bank_details: settings?.bank_details || '',
+        brand_color: settings?.brand_color || '#0f172a',
+        logo: null,
     });
 
     const [toast, setToast] = useState(null);
@@ -87,6 +89,43 @@ export default function Index({ auth, settings }) {
                                     ></textarea>
                                     <p className="text-xs text-slate-500">This text will be printed at the bottom of all generated invoice PDFs.</p>
                                     {errors.bank_details && <p className="text-sm text-red-500">{errors.bank_details}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="block text-sm font-medium text-slate-300">Brand Color</label>
+                                    <div className="flex items-center space-x-3">
+                                        <input
+                                            type="color"
+                                            value={data.brand_color}
+                                            onChange={e => setData('brand_color', e.target.value)}
+                                            className="h-9 w-14 rounded border border-slate-700 bg-slate-800 p-0.5 cursor-pointer"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={data.brand_color}
+                                            onChange={e => setData('brand_color', e.target.value)}
+                                            className="block w-32 rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-slate-500">Hex color code for invoice headers.</p>
+                                    {errors.brand_color && <p className="text-sm text-red-500">{errors.brand_color}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="block text-sm font-medium text-slate-300">Invoice Logo</label>
+                                    <div className="flex items-center space-x-4">
+                                        {settings?.logo_url && !data.logo && (
+                                            <img src={`/storage/${settings.logo_url}`} alt="Current Logo" className="h-16 w-auto object-contain rounded bg-white p-1" />
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={e => setData('logo', e.target.files[0])}
+                                            className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-900 file:text-indigo-300 hover:file:bg-indigo-800"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-slate-500">Upload a company logo for the top of your invoices.</p>
+                                    {errors.logo && <p className="text-sm text-red-500">{errors.logo}</p>}
                                 </div>
 
                                 <div className="pt-4 border-t border-slate-800">

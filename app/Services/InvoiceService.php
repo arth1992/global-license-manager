@@ -25,8 +25,10 @@ class InvoiceService
             return $existingInvoice;
         }
 
-        $baseFee = self::BASE_FEE;
-        $applicantFee = $activeApplicantCount * self::FEE_PER_APPLICANT;
+        $baseFee = $license->base_fee ?? self::BASE_FEE;
+        $perApplicantFee = $license->per_applicant_fee ?? self::FEE_PER_APPLICANT;
+        
+        $applicantFee = $activeApplicantCount * $perApplicantFee;
         $subtotal = $baseFee + $applicantFee;
         $discountAmount = 0;
         $status = 'Unpaid';
@@ -79,6 +81,7 @@ class InvoiceService
             'date' => now()->format('F j, Y'),
             'dueDate' => now()->addDays(15)->format('F j, Y'),
             'bankDetails' => $settings->bank_details,
+            'settings' => $settings,
         ];
 
         // We assume pdf/invoice.blade.php exists

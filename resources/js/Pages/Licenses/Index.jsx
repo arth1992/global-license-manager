@@ -13,6 +13,8 @@ export default function Index({ licenses, filters }) {
         max_tenants: 1,
         expires_at: '',
         features: [],
+        base_fee: '',
+        per_applicant_fee: '',
     });
 
     const handleSearchSubmit = (e) => {
@@ -288,6 +290,50 @@ export default function Index({ licenses, filters }) {
                                     {errors.max_tenants && (
                                         <span className="text-xs text-rose-500 block mt-1">{errors.max_tenants}</span>
                                     )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                                            Custom Base Fee (Optional)
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">₹</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={data.base_fee}
+                                                onChange={(e) => setData('base_fee', e.target.value)}
+                                                placeholder="Default: 2000"
+                                                className="w-full pl-8 pr-3.5 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-slate-600 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                                            />
+                                        </div>
+                                        {errors.base_fee && (
+                                            <span className="text-xs text-rose-500 block mt-1">{errors.base_fee}</span>
+                                        )}
+                                    </div>
+    
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                                            Custom Per-Applicant Fee
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">₹</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={data.per_applicant_fee}
+                                                onChange={(e) => setData('per_applicant_fee', e.target.value)}
+                                                placeholder="Default: 200"
+                                                className="w-full pl-8 pr-3.5 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-slate-600 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-300"
+                                            />
+                                        </div>
+                                        {errors.per_applicant_fee && (
+                                            <span className="text-xs text-rose-500 block mt-1">{errors.per_applicant_fee}</span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div>

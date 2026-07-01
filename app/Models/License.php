@@ -23,6 +23,8 @@ class License extends Model
         'license_key',
         'expires_at',
         'activated_at',
+        'base_fee',
+        'per_applicant_fee',
     ];
 
     protected $casts = [

@@ -176,6 +176,20 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                         {license.activated_at || <span className="text-slate-600 text-xs italic">Unactivated</span>}
                                     </p>
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custom Base Fee</span>
+                                        <p className="text-slate-300 mt-0.5 font-medium">
+                                            {license.base_fee ? `₹${license.base_fee}` : <span className="text-slate-600 text-xs italic">Default (₹2000)</span>}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custom Applicant Fee</span>
+                                        <p className="text-slate-300 mt-0.5 font-medium">
+                                            {license.per_applicant_fee ? `₹${license.per_applicant_fee}` : <span className="text-slate-600 text-xs italic">Default (₹200)</span>}
+                                        </p>
+                                    </div>
+                                </div>
                                 <div>
                                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Enabled Features</span>
                                     <div className="flex flex-wrap gap-1.5">

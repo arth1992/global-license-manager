@@ -198,6 +198,8 @@ class DashboardController extends Controller
             'max_tenants'  => 'required|integer|min:1',
             'expires_at'   => 'required|date|after:today',
             'features'     => 'nullable|array',
+            'base_fee' => 'nullable|numeric|min:0',
+            'per_applicant_fee' => 'nullable|numeric|min:0',
         ]);
 
         $license = License::create([
@@ -207,6 +209,8 @@ class DashboardController extends Controller
             'expires_at'   => Carbon::parse($validated['expires_at']),
             'features'     => $validated['features'] ?? [],
             'status'       => 'pending',
+            'base_fee'     => $validated['base_fee'] ?? null,
+            'per_applicant_fee' => $validated['per_applicant_fee'] ?? null,
         ]);
 
         $license->log(

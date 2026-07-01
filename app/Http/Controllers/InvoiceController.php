@@ -42,12 +42,16 @@ class InvoiceController extends Controller
             'billing_discount_type' => 'nullable|string|in:fixed,percentage',
             'billing_discount_amount' => 'nullable|numeric|min:0',
             'is_billing_waived' => 'boolean',
+            'base_fee' => 'nullable|numeric|min:0',
+            'per_applicant_fee' => 'nullable|numeric|min:0',
         ]);
 
         $license->update([
             'billing_discount_type' => $validated['billing_discount_type'] ?? null,
             'billing_discount_amount' => $validated['billing_discount_amount'] ?? null,
             'is_billing_waived' => $validated['is_billing_waived'] ?? false,
+            'base_fee' => $validated['base_fee'] ?? null,
+            'per_applicant_fee' => $validated['per_applicant_fee'] ?? null,
         ]);
 
         return back()->with('success', 'Billing settings updated successfully.');
