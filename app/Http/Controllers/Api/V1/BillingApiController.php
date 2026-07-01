@@ -90,7 +90,7 @@ class BillingApiController extends Controller
         return response()->json([
             'invoices' => $invoices,
             'estimated_bill' => $estimatedBill,
-            'razorpay_key' => env('RAZORPAY_KEY_ID', ''), // Setup Razorpay centrally
+            'razorpay_key' => \App\Models\SystemSetting::getActive()->razorpay_key_id, // Setup Razorpay centrally
             'is_billing_waived' => $license->is_billing_waived,
         ]);
     }

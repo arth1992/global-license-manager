@@ -93,6 +93,10 @@
     </div>
 
     <div class="footer">
+        @if($bankDetails)
+            <strong>Bank Transfer Details:</strong><br>
+            {!! nl2br(e($bankDetails)) !!}<br><br>
+        @endif
         Please make checks payable to Global Admission Manager, or pay online via the dashboard.<br>
         Thank you for your business!
     </div>

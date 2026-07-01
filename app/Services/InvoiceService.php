@@ -70,12 +70,14 @@ class InvoiceService
     public function generateInvoicePdf(Invoice $invoice)
     {
         $license = $invoice->license;
+        $settings = \App\Models\SystemSetting::getActive();
         
         $data = [
             'invoice' => $invoice,
             'license' => $license,
             'date' => now()->format('F j, Y'),
             'dueDate' => now()->addDays(15)->format('F j, Y'),
+            'bankDetails' => $settings->bank_details,
         ];
 
         // We assume pdf/invoice.blade.php exists
@@ -96,10 +98,13 @@ class InvoiceService
             'transaction_id' => $transactionId,
         ]);
 
+        $settings = \App\Models\SystemSetting::getActive();
+
         $data = [
             'invoice' => $invoice,
             'license' => $invoice->license,
             'date' => now()->format('F j, Y'),
+            'bankDetails' => $settings->bank_details,
         ];
 
         // We assume pdf/receipt.blade.php exists
