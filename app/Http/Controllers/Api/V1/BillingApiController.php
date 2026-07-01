@@ -27,6 +27,7 @@ class BillingApiController extends Controller
             'domain' => 'required|string',
             'fingerprint' => 'required|string',
             'active_applicant_count' => 'required|integer|min:0',
+            'school_breakdown' => 'nullable|array',
             'sync_month' => 'required|integer',
             'sync_year' => 'required|integer',
         ]);
@@ -42,7 +43,8 @@ class BillingApiController extends Controller
                 $license,
                 $validated['active_applicant_count'],
                 $validated['sync_month'],
-                $validated['sync_year']
+                $validated['sync_year'],
+                $validated['school_breakdown'] ?? null
             );
 
             \App\Models\BillingLog::create([

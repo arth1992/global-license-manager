@@ -61,10 +61,19 @@
                 <td class="text-right">₹{{ number_format($invoice->base_fee, 2) }}</td>
             </tr>
             @if($invoice->applicant_count > 0)
-            <tr>
-                <td>Active Applicant Usage ({{ $invoice->applicant_count }} applicants @ ₹200)</td>
-                <td class="text-right">₹{{ number_format($invoice->applicant_fee, 2) }}</td>
-            </tr>
+                @if(is_array($invoice->school_breakdown) && count($invoice->school_breakdown) > 0)
+                    @foreach($invoice->school_breakdown as $school)
+                        <tr>
+                            <td>Applicant Usage - {{ $school['name'] ?? 'School' }} ({{ $school['applicants'] ?? 0 }} applicants @ ₹200)</td>
+                            <td class="text-right">₹{{ number_format(($school['applicants'] ?? 0) * 200, 2) }}</td>
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td>Active Applicant Usage ({{ $invoice->applicant_count }} applicants @ ₹200)</td>
+                        <td class="text-right">₹{{ number_format($invoice->applicant_fee, 2) }}</td>
+                    </tr>
+                @endif
             @endif
             @if($invoice->discount_applied > 0)
             <tr>

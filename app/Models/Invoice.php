@@ -16,6 +16,7 @@ class Invoice extends Model
         'invoice_year',
         'base_fee',
         'applicant_count',
+        'school_breakdown',
         'applicant_fee',
         'discount_applied',
         'total_amount',
@@ -23,6 +24,10 @@ class Invoice extends Model
         'pdf_path',
         'receipt_pdf_path',
         'transaction_id',
+    ];
+
+    protected $casts = [
+        'school_breakdown' => 'array',
     ];
 
     public function license()

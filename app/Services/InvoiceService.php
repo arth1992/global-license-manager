@@ -13,7 +13,7 @@ class InvoiceService
     public const BASE_FEE = 2000.00; // INR
     public const FEE_PER_APPLICANT = 200.00; // INR
 
-    public function generateInvoice(License $license, int $activeApplicantCount, int $month, int $year)
+    public function generateInvoice(License $license, int $activeApplicantCount, int $month, int $year, ?array $schoolBreakdown = null)
     {
         // Check if an invoice for this month/year already exists for this license
         $existingInvoice = Invoice::where('license_id', $license->id)
@@ -56,6 +56,7 @@ class InvoiceService
             'invoice_year' => $year,
             'base_fee' => $baseFee,
             'applicant_count' => $activeApplicantCount,
+            'school_breakdown' => $schoolBreakdown,
             'applicant_fee' => $applicantFee,
             'discount_applied' => $discountAmount,
             'total_amount' => $totalAmount,
