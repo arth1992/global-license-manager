@@ -45,11 +45,27 @@ class BillingApiController extends Controller
                 $validated['sync_year']
             );
 
+            \App\Models\BillingLog::create([
+                'license_id' => $license->id,
+                'status' => 'success',
+                'notes' => "Auto-synced {$validated['active_applicant_count']} applicants",
+                'sync_month' => $validated['sync_month'],
+                'sync_year' => $validated['sync_year'],
+            ]);
+
             return response()->json([
                 'message' => 'Billing usage synced and invoice generated.',
                 'invoice' => $invoice
             ]);
         } catch (\Exception $e) {
+            \App\Models\BillingLog::create([
+                'license_id' => $license->id,
+                'status' => 'failed',
+                'notes' => "Auto-sync failed: " . $e->getMessage(),
+                'sync_month' => $validated['sync_month'],
+                'sync_year' => $validated['sync_year'],
+            ]);
+
             Log::error('Billing Sync Error: ' . $e->getMessage());
             return response()->json(['message' => 'Internal server error while syncing billing.'], 500);
         }

@@ -2,11 +2,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Show({ license, activations, logs }) {
+export default function Show({ license, activations, logs, billingLogs }) {
     const [copied, setCopied] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [resettingLicense, setResettingLicense] = useState(false);
     const [deletingClient, setDeletingClient] = useState(false);
+    const [generatingManual, setGeneratingManual] = useState(false);
 
     const { post, processing: generatingKey } = useForm();
 
@@ -47,6 +48,17 @@ export default function Show({ license, activations, logs }) {
         router.delete(route('licenses.destroy', license.uuid), {
             onStart: () => setDeletingClient(true),
             onFinish: () => setDeletingClient(false),
+        });
+    };
+
+    const handleManualGenerate = () => {
+        if (!confirm('Are you sure you want to manually generate an invoice for this client? Since applicant usage cannot be pulled remotely, this will generate an invoice for the Base Fee only.')) {
+            return;
+        }
+
+        router.post(route('licenses.invoices.manual', license.uuid), {}, {
+            onStart: () => setGeneratingManual(true),
+            onFinish: () => setGeneratingManual(false),
         });
     };
 
@@ -380,6 +392,71 @@ export default function Show({ license, activations, logs }) {
                                 )}
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Billing Logs Section (Full Width Below) */}
+                <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 shadow-sm overflow-hidden mb-12">
+                    <div className="border-b border-slate-800 bg-slate-900/50 px-6 py-4 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold text-white text-base">Billing & Invoices Logs</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                Log of automated monthly invoice syncs (push) from the Tenant server, and manual generations.
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleManualGenerate}
+                            disabled={generatingManual}
+                            className="inline-flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition-all disabled:opacity-50 focus:outline-none"
+                        >
+                            {generatingManual ? 'Generating...' : 'Generate Base Invoice Manually'}
+                        </button>
+                    </div>
+                    <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-800 bg-slate-900/30 text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    <th className="px-6 py-3">Timestamp</th>
+                                    <th className="px-6 py-3">Status</th>
+                                    <th className="px-6 py-3">Sync Period</th>
+                                    <th className="px-6 py-3">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800">
+                                {billingLogs && billingLogs.length > 0 ? (
+                                    billingLogs.map((log) => (
+                                        <tr key={log.id} className="text-xs text-slate-300 transition-all hover:bg-slate-850/10">
+                                            <td className="px-6 py-3 text-slate-400 font-mono">
+                                                {log.created_at}
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold border ${
+                                                    log.status === 'success'
+                                                        ? 'bg-emerald-950/40 border-emerald-800 text-emerald-450'
+                                                        : log.status === 'manual'
+                                                        ? 'bg-indigo-950/40 border-indigo-850 text-indigo-400'
+                                                        : 'bg-rose-950/40 border-rose-800 text-rose-400'
+                                                }`}>
+                                                    {log.status.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3 font-mono text-slate-400">
+                                                {log.sync_period}
+                                            </td>
+                                            <td className="px-6 py-3 truncate max-w-[250px]" title={log.notes}>
+                                                {log.notes}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="4" className="text-center py-6 text-slate-600 text-xs italic">
+                                            No billing logs recorded for this license.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -50,6 +50,37 @@ class InvoiceController extends Controller
             'is_billing_waived' => $validated['is_billing_waived'] ?? false,
         ]);
 
-        return back()->with('success', 'Billing settings updated for ' . $license->client_name);
+        return back()->with('success', 'Billing settings updated successfully.');
+    }
+
+    public function manualGenerate(Request $request, License $license, InvoiceService $invoiceService)
+    {
+        try {
+            $month = now()->subMonth()->month;
+            $year = now()->subMonth()->year;
+
+            // Generate invoice with 0 active applicants (Base fee only)
+            $invoiceService->generateInvoice($license, 0, $month, $year);
+
+            \App\Models\BillingLog::create([
+                'license_id' => $license->id,
+                'status' => 'manual',
+                'notes' => 'Manually generated base fee invoice.',
+                'sync_month' => $month,
+                'sync_year' => $year,
+            ]);
+
+            return back()->with('success', 'Base fee invoice generated successfully.');
+        } catch (\Exception $e) {
+            \App\Models\BillingLog::create([
+                'license_id' => $license->id,
+                'status' => 'failed',
+                'notes' => 'Manual generation failed: ' . $e->getMessage(),
+                'sync_month' => now()->subMonth()->month,
+                'sync_year' => now()->subMonth()->year,
+            ]);
+
+            return back()->with('error', 'Failed to generate invoice: ' . $e->getMessage());
+        }
     }
 }

@@ -122,10 +122,14 @@ class DashboardController extends Controller
             },
             'logs' => function ($q) {
                 $q->orderBy('id', 'desc');
+            },
+            'billingLogs' => function ($q) {
+                $q->orderBy('created_at', 'desc');
             }
         ]);
 
         $formattedLicense = [
+            'id'           => $license->id,
             'uuid'         => $license->uuid,
             'client_name'  => $license->client_name,
             'client_email' => $license->client_email,
@@ -165,10 +169,21 @@ class DashboardController extends Controller
             ];
         });
 
+        $billingLogs = $license->billingLogs->map(function ($log) {
+            return [
+                'id'          => $log->id,
+                'status'      => $log->status,
+                'notes'       => $log->notes,
+                'sync_period' => $log->sync_month && $log->sync_year ? sprintf('%02d/%d', $log->sync_month, $log->sync_year) : 'N/A',
+                'created_at'  => $log->created_at ? $log->created_at->format('Y-m-d H:i') : 'Just now',
+            ];
+        });
+
         return Inertia::render('Licenses/Show', [
             'license'     => $formattedLicense,
             'activations' => $activations,
             'logs'        => $logs,
+            'billingLogs' => $billingLogs,
         ]);
     }
 

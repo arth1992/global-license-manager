@@ -55,6 +55,11 @@ class License extends Model
         return $this->hasMany(LicenseLog::class);
     }
 
+    public function billingLogs(): HasMany
+    {
+        return $this->hasMany(BillingLog::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active' && $this->expires_at->isFuture();
