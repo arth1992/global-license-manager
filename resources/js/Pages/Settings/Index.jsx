@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Index({ auth, settings }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -25,21 +26,15 @@ export default function Index({ auth, settings }) {
         setSendingTest(true);
         setToast(null);
         try {
-            const response = await fetch(route('settings.test-email'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            });
-            const res = await response.json();
-            if (response.ok && res.status === 'success') {
-                setToast({ type: 'success', message: res.message });
+            const response = await axios.post(route('settings.test-email'));
+            if (response.data && response.data.status === 'success') {
+                setToast({ type: 'success', message: response.data.message });
             } else {
-                setToast({ type: 'error', message: res.message || 'SMTP connection verification failed.' });
+                setToast({ type: 'error', message: response.data.message || 'SMTP connection verification failed.' });
             }
         } catch (error) {
-            setToast({ type: 'error', message: error.message || 'SMTP connection timed out or network error.' });
+            const message = error.response?.data?.message || error.message || 'SMTP connection timed out or network error.';
+            setToast({ type: 'error', message });
         } finally {
             setSendingTest(false);
         }
