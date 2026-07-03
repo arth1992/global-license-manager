@@ -13,12 +13,9 @@ class BillingApiController extends Controller
 {
     private function authenticateLicense(Request $request)
     {
-        $domain = $request->input('domain');
         $fingerprint = $request->input('fingerprint');
 
-        return License::where('domain', $domain)
-            ->where('fingerprint', $fingerprint)
-            ->first();
+        return License::where('fingerprint', $fingerprint)->first();
     }
 
     public function syncUsage(Request $request, InvoiceService $invoiceService)

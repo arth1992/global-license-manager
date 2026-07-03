@@ -67,6 +67,30 @@ class InvoiceService
 
         $this->generateInvoicePdf($invoice);
 
+        try {
+            if ($license->client_email) {
+                // Apply dynamic SMTP settings if available
+                $settings = \App\Models\SystemSetting::getActive();
+                
+                if ($settings->smtp_host) {
+                    config([
+                        'mail.mailers.smtp.host' => $settings->smtp_host,
+                        'mail.mailers.smtp.port' => $settings->smtp_port,
+                        'mail.mailers.smtp.username' => $settings->smtp_username,
+                        'mail.mailers.smtp.password' => $settings->smtp_password,
+                        'mail.mailers.smtp.encryption' => $settings->smtp_encryption,
+                        'mail.from.address' => $settings->smtp_from_address ?: config('mail.from.address'),
+                        'mail.from.name' => $settings->smtp_from_name ?: config('mail.from.name'),
+                    ]);
+                }
+
+                \Illuminate\Support\Facades\Mail::to($license->client_email)
+                    ->send(new \App\Mail\InvoiceGenerated($invoice));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send invoice email: ' . $e->getMessage());
+        }
+
         return $invoice;
     }
 

@@ -24,6 +24,13 @@ class SettingsController extends Controller
             'bank_details' => 'nullable|string',
             'brand_color' => 'nullable|string|max:20',
             'logo' => 'nullable|image|max:2048', // max 2MB
+            'smtp_host' => 'nullable|string|max:255',
+            'smtp_port' => 'nullable|string|max:255',
+            'smtp_username' => 'nullable|string|max:255',
+            'smtp_password' => 'nullable|string|max:255',
+            'smtp_encryption' => 'nullable|string|max:255',
+            'smtp_from_address' => 'nullable|email|max:255',
+            'smtp_from_name' => 'nullable|string|max:255',
         ]);
 
         $settings = SystemSetting::getActive();

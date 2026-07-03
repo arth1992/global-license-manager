@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
+import Modal from '@/Components/Modal';
 
 export default function Show({ license, activations, logs, billingLogs }) {
     const [copied, setCopied] = useState(false);
@@ -8,8 +9,22 @@ export default function Show({ license, activations, logs, billingLogs }) {
     const [resettingLicense, setResettingLicense] = useState(false);
     const [deletingClient, setDeletingClient] = useState(false);
     const [generatingManual, setGeneratingManual] = useState(false);
+    const [showBillingModal, setShowBillingModal] = useState(false);
 
     const { post, processing: generatingKey } = useForm();
+    const { 
+        data: billingData, 
+        setData: setBillingData, 
+        put: putBilling, 
+        processing: updatingBilling, 
+        errors: billingErrors 
+    } = useForm({
+        base_fee: license.base_fee || '',
+        per_applicant_fee: license.per_applicant_fee || '',
+        billing_discount_type: license.billing_discount_type || '',
+        billing_discount_amount: license.billing_discount_amount || '',
+        is_billing_waived: license.is_billing_waived || false,
+    });
 
     const handleCopyKey = () => {
         if (!license.license_key) return;
@@ -59,6 +74,13 @@ export default function Show({ license, activations, logs, billingLogs }) {
         router.post(route('licenses.invoices.manual', license.uuid), {}, {
             onStart: () => setGeneratingManual(true),
             onFinish: () => setGeneratingManual(false),
+        });
+    };
+
+    const handleUpdateBilling = (e) => {
+        e.preventDefault();
+        putBilling(route('licenses.billing.update', license.uuid), {
+            onSuccess: () => setShowBillingModal(false),
         });
     };
 
@@ -136,8 +158,17 @@ export default function Show({ license, activations, logs, billingLogs }) {
                     <div className="lg:col-span-1 space-y-8">
                         {/* Core Details Panel */}
                         <div className="rounded-xl border border-slate-800 bg-slate-900 shadow-sm overflow-hidden">
-                            <div className="border-b border-slate-800 bg-slate-900/50 px-6 py-4">
+                            <div className="border-b border-slate-800 bg-slate-900/50 px-6 py-4 flex justify-between items-center">
                                 <h3 className="font-bold text-white text-base">Key Properties</h3>
+                                <button
+                                    onClick={() => setShowBillingModal(true)}
+                                    className="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center focus:outline-none"
+                                >
+                                    <svg className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    Edit Billing
+                                </button>
                             </div>
                             <div className="p-6 space-y-4 text-sm">
                                 <div>
@@ -474,6 +505,75 @@ export default function Show({ license, activations, logs, billingLogs }) {
                     </div>
                 </div>
             </div>
+
+            <Modal show={showBillingModal} onClose={() => setShowBillingModal(false)}>
+                <div className="p-6 bg-slate-900 text-slate-300">
+                    <h2 className="text-lg font-medium text-slate-100 mb-6">
+                        Edit Billing Settings
+                    </h2>
+                    
+                    <form onSubmit={handleUpdateBilling} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">
+                                    Base Fee (₹)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={billingData.base_fee}
+                                    onChange={(e) => setBillingData('base_fee', e.target.value)}
+                                    placeholder="2000"
+                                    className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                {billingErrors.base_fee && <p className="mt-1 text-xs text-rose-500">{billingErrors.base_fee}</p>}
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">
+                                    Per Applicant Fee (₹)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={billingData.per_applicant_fee}
+                                    onChange={(e) => setBillingData('per_applicant_fee', e.target.value)}
+                                    placeholder="200"
+                                    className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                {billingErrors.per_applicant_fee && <p className="mt-1 text-xs text-rose-500">{billingErrors.per_applicant_fee}</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    checked={billingData.is_billing_waived}
+                                    onChange={(e) => setBillingData('is_billing_waived', e.target.checked)}
+                                    className="rounded border-slate-700 bg-slate-800 text-indigo-500 focus:ring-indigo-500"
+                                />
+                                <span className="text-sm font-medium text-slate-400">Waive all billing for this client</span>
+                            </label>
+                        </div>
+
+                        <div className="mt-6 flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowBillingModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={updatingBilling}
+                                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                            >
+                                {updatingBilling ? 'Saving...' : 'Save Settings'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

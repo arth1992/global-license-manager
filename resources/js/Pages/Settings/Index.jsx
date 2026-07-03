@@ -9,6 +9,13 @@ export default function Index({ auth, settings }) {
         bank_details: settings?.bank_details || '',
         brand_color: settings?.brand_color || '#0f172a',
         logo: null,
+        smtp_host: settings?.smtp_host || '',
+        smtp_port: settings?.smtp_port || '',
+        smtp_username: settings?.smtp_username || '',
+        smtp_password: settings?.smtp_password || '',
+        smtp_encryption: settings?.smtp_encryption || '',
+        smtp_from_address: settings?.smtp_from_address || '',
+        smtp_from_name: settings?.smtp_from_name || '',
     });
 
     const [toast, setToast] = useState(null);
@@ -23,6 +30,7 @@ export default function Index({ auth, settings }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('settings.update'), {
+            preserveScroll: true,
             onSuccess: () => {
                 setToast({ type: 'success', message: 'Settings saved successfully.' });
             },
@@ -35,15 +43,15 @@ export default function Index({ auth, settings }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-slate-100 leading-tight">Global Payment Settings</h2>}
+            header={<h2 className="font-semibold text-xl text-slate-100 leading-tight">Global Payment & System Settings</h2>}
         >
-            <Head title="Payment Settings" />
+            <Head title="System Settings" />
 
             <div className="py-12">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
+                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
                     
                     {toast && (
-                        <div className={`mb-6 p-4 rounded border ${toast.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                        <div className={`p-4 rounded border ${toast.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
                             {toast.message}
                         </div>
                     )}
@@ -126,6 +134,93 @@ export default function Index({ auth, settings }) {
                                     </div>
                                     <p className="text-xs text-slate-500">Upload a company logo for the top of your invoices.</p>
                                     {errors.logo && <p className="text-sm text-red-500">{errors.logo}</p>}
+                                </div>
+
+                                <div className="pt-8 mt-8 border-t border-slate-800">
+                                    <h3 className="text-lg font-bold text-white mb-6">Email Configuration (SMTP)</h3>
+                                    <p className="text-sm text-slate-400 mb-6">Configure how invoices are emailed to your clients.</p>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">SMTP Host</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.smtp_host}
+                                                onChange={e => setData('smtp_host', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="smtp.mailtrap.io"
+                                            />
+                                            {errors.smtp_host && <p className="text-sm text-red-500">{errors.smtp_host}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">SMTP Port</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.smtp_port}
+                                                onChange={e => setData('smtp_port', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="2525"
+                                            />
+                                            {errors.smtp_port && <p className="text-sm text-red-500">{errors.smtp_port}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">SMTP Username</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.smtp_username}
+                                                onChange={e => setData('smtp_username', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            />
+                                            {errors.smtp_username && <p className="text-sm text-red-500">{errors.smtp_username}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">SMTP Password</label>
+                                            <input 
+                                                type="password" 
+                                                value={data.smtp_password}
+                                                onChange={e => setData('smtp_password', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            />
+                                            {errors.smtp_password && <p className="text-sm text-red-500">{errors.smtp_password}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">SMTP Encryption</label>
+                                            <select
+                                                value={data.smtp_encryption}
+                                                onChange={e => setData('smtp_encryption', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            >
+                                                <option value="">None</option>
+                                                <option value="tls">TLS</option>
+                                                <option value="ssl">SSL</option>
+                                            </select>
+                                            {errors.smtp_encryption && <p className="text-sm text-red-500">{errors.smtp_encryption}</p>}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">From Address</label>
+                                            <input 
+                                                type="email" 
+                                                value={data.smtp_from_address}
+                                                onChange={e => setData('smtp_from_address', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="billing@yourcompany.com"
+                                            />
+                                            {errors.smtp_from_address && <p className="text-sm text-red-500">{errors.smtp_from_address}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">From Name</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.smtp_from_name}
+                                                onChange={e => setData('smtp_from_name', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="Global Admission Manager"
+                                            />
+                                            {errors.smtp_from_name && <p className="text-sm text-red-500">{errors.smtp_from_name}</p>}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="pt-4 border-t border-slate-800">

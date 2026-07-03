@@ -12,6 +12,13 @@ class SystemSetting extends Model
         'bank_details',
         'logo_url',
         'brand_color',
+        'smtp_host',
+        'smtp_port',
+        'smtp_username',
+        'smtp_password',
+        'smtp_encryption',
+        'smtp_from_address',
+        'smtp_from_name',
     ];
 
     /**
