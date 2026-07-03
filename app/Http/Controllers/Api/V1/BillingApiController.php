@@ -93,13 +93,27 @@ class BillingApiController extends Controller
         // Since we don't have real-time applicant count from the DB (it's in the tenant DB),
         // we will just show the base fee + 0 applicants until the sync happens, 
         // OR we just show what the base fee is.
+        $baseFee = $license->base_fee ?? InvoiceService::BASE_FEE;
+        $perApplicantRate = $license->per_applicant_fee ?? InvoiceService::FEE_PER_APPLICANT;
+        
+        $discountAmount = 0;
+        if ($license->is_billing_waived) {
+            $discountAmount = $baseFee;
+        } elseif ($license->billing_discount_type === 'fixed') {
+            $discountAmount = min($license->billing_discount_amount ?? 0, $baseFee);
+        } elseif ($license->billing_discount_type === 'percentage') {
+            $discountPercent = min($license->billing_discount_amount ?? 0, 100);
+            $discountAmount = $baseFee * ($discountPercent / 100);
+        }
+        $total = max(0, $baseFee - $discountAmount);
+
         $estimatedBill = [
-            'base_fee' => InvoiceService::BASE_FEE,
+            'base_fee' => $baseFee,
             'applicant_count' => 'Calculated at end of month',
-            'applicant_fee' => 0,
-            'subtotal' => InvoiceService::BASE_FEE,
-            'discount' => 0,
-            'total' => InvoiceService::BASE_FEE,
+            'applicant_fee' => $perApplicantRate,
+            'subtotal' => $baseFee,
+            'discount' => $discountAmount,
+            'total' => $total,
         ];
 
         return response()->json([

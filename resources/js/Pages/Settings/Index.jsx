@@ -19,6 +19,31 @@ export default function Index({ auth, settings }) {
     });
 
     const [toast, setToast] = useState(null);
+    const [sendingTest, setSendingTest] = useState(false);
+
+    const handleSendTestEmail = async () => {
+        setSendingTest(true);
+        setToast(null);
+        try {
+            const response = await fetch(route('settings.test-email'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+            const res = await response.json();
+            if (response.ok && res.status === 'success') {
+                setToast({ type: 'success', message: res.message });
+            } else {
+                setToast({ type: 'error', message: res.message || 'SMTP connection verification failed.' });
+            }
+        } catch (error) {
+            setToast({ type: 'error', message: error.message || 'SMTP connection timed out or network error.' });
+        } finally {
+            setSendingTest(false);
+        }
+    };
 
     useEffect(() => {
         if (toast) {
@@ -137,8 +162,20 @@ export default function Index({ auth, settings }) {
                                 </div>
 
                                 <div className="pt-8 mt-8 border-t border-slate-800">
-                                    <h3 className="text-lg font-bold text-white mb-6">Email Configuration (SMTP)</h3>
-                                    <p className="text-sm text-slate-400 mb-6">Configure how invoices are emailed to your clients.</p>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white">Email Configuration (SMTP)</h3>
+                                            <p className="text-sm text-slate-400">Configure how invoices are emailed to your clients.</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleSendTestEmail}
+                                            disabled={sendingTest || !data.smtp_host || !data.smtp_from_address}
+                                            className="inline-flex justify-center py-2 px-4 border border-slate-700 shadow-sm text-xs font-semibold rounded-md text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+                                        >
+                                            {sendingTest ? 'Sending Test...' : 'Send Test Email'}
+                                        </button>
+                                    </div>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">

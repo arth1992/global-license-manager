@@ -62,28 +62,28 @@
         <tbody>
             <tr>
                 <td>Monthly Base Platform Fee ({{ date('F Y', mktime(0, 0, 0, $invoice->invoice_month, 1, $invoice->invoice_year)) }})</td>
-                <td class="text-right">₹{{ number_format($invoice->base_fee, 2) }}</td>
+                <td class="text-right">Rs. {{ number_format($invoice->base_fee, 2) }}</td>
             </tr>
             @if($invoice->applicant_count > 0)
                 @php $rate = $invoice->applicant_fee / $invoice->applicant_count; @endphp
                 @if(is_array($invoice->school_breakdown) && count($invoice->school_breakdown) > 0)
                     @foreach($invoice->school_breakdown as $school)
                         <tr>
-                            <td>Applicant Usage - {{ $school['name'] ?? 'School' }} ({{ $school['applicants'] ?? 0 }} applicants @ ₹{{ number_format($rate, 2) }})</td>
-                            <td class="text-right">₹{{ number_format(($school['applicants'] ?? 0) * $rate, 2) }}</td>
+                            <td>Applicant Usage - {{ $school['name'] ?? 'School' }} ({{ $school['applicants'] ?? 0 }} applicants @ Rs. {{ number_format($rate, 2) }})</td>
+                            <td class="text-right">Rs. {{ number_format(($school['applicants'] ?? 0) * $rate, 2) }}</td>
                         </tr>
                     @endforeach
                 @else
                     <tr>
-                        <td>Active Applicant Usage ({{ $invoice->applicant_count }} applicants @ ₹{{ number_format($rate, 2) }})</td>
-                        <td class="text-right">₹{{ number_format($invoice->applicant_fee, 2) }}</td>
+                        <td>Active Applicant Usage ({{ $invoice->applicant_count }} applicants @ Rs. {{ number_format($rate, 2) }})</td>
+                        <td class="text-right">Rs. {{ number_format($invoice->applicant_fee, 2) }}</td>
                     </tr>
                 @endif
             @endif
             @if($invoice->discount_applied > 0)
             <tr>
                 <td>Discount / Waiver Applied</td>
-                <td class="text-right">-₹{{ number_format($invoice->discount_applied, 2) }}</td>
+                <td class="text-right">-Rs. {{ number_format($invoice->discount_applied, 2) }}</td>
             </tr>
             @endif
         </tbody>
@@ -92,17 +92,17 @@
     <div class="summary">
         <div class="summary-row">
             <div class="summary-label">Subtotal:</div>
-            <div class="summary-value">₹{{ number_format($invoice->base_fee + $invoice->applicant_fee, 2) }}</div>
+            <div class="summary-value">Rs. {{ number_format($invoice->base_fee + $invoice->applicant_fee, 2) }}</div>
         </div>
         @if($invoice->discount_applied > 0)
         <div class="summary-row">
             <div class="summary-label">Discount:</div>
-            <div class="summary-value">-₹{{ number_format($invoice->discount_applied, 2) }}</div>
+            <div class="summary-value">-Rs. {{ number_format($invoice->discount_applied, 2) }}</div>
         </div>
         @endif
         <div class="summary-row total-row">
             <div class="summary-label">Total Due:</div>
-            <div class="summary-value">₹{{ number_format($invoice->total_amount, 2) }}</div>
+            <div class="summary-value">Rs. {{ number_format($invoice->total_amount, 2) }}</div>
         </div>
     </div>
 

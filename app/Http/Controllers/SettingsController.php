@@ -47,4 +47,50 @@ class SettingsController extends Controller
 
         return back()->with('success', 'System settings updated successfully.');
     }
+
+    public function sendTestEmail(Request $request)
+    {
+        try {
+            $settings = SystemSetting::getActive();
+            $toEmail = $settings->smtp_from_address;
+            
+            if (!$toEmail) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Please save your "From Address" before sending a test email.'
+                ], 422);
+            }
+
+            if ($settings->smtp_host) {
+                config([
+                    'mail.mailers.smtp.host' => $settings->smtp_host,
+                    'mail.mailers.smtp.port' => (int) $settings->smtp_port,
+                    'mail.mailers.smtp.username' => $settings->smtp_username,
+                    'mail.mailers.smtp.password' => $settings->smtp_password,
+                    'mail.mailers.smtp.encryption' => $settings->smtp_encryption === 'none' ? null : $settings->smtp_encryption,
+                    'mail.from.address' => $settings->smtp_from_address,
+                    'mail.from.name' => $settings->smtp_from_name ?: config('mail.from.name'),
+                ]);
+            }
+            
+            app('mail.manager')->forgetMailers();
+
+            \Illuminate\Support\Facades\Mail::raw(
+                "Congratulations!\n\nYour outgoing SMTP server connection has been successfully verified by Global License Manager.\n\nConfigured SMTP Server: {$settings->smtp_host}:{$settings->smtp_port} ({$settings->smtp_encryption})\nSender Identity: {$settings->smtp_from_name} <{$settings->smtp_from_address}>\n\nHave a great day!",
+                function ($message) use ($toEmail) {
+                    $message->to($toEmail)->subject("GLM SMTP Connection Verification");
+                }
+            );
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Test email successfully sent to {$toEmail}!"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

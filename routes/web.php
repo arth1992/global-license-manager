@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // System Settings
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/test-email', [\App\Http\Controllers\SettingsController::class, 'sendTestEmail'])->name('settings.test-email');
 });
 
 Route::middleware('auth')->group(function () {

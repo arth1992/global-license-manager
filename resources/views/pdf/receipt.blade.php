@@ -53,7 +53,7 @@
         <tbody>
             <tr>
                 <td>Payment for Invoice {{ $invoice->invoice_number }}</td>
-                <td class="text-right">₹{{ number_format($invoice->total_amount, 2) }}</td>
+                <td class="text-right">Rs. {{ number_format($invoice->total_amount, 2) }}</td>
             </tr>
         </tbody>
     </table>
@@ -61,7 +61,7 @@
     <div class="summary">
         <div class="summary-row total-row">
             <div class="summary-label">Amount Paid:</div>
-            <div class="summary-value">₹{{ number_format($invoice->total_amount, 2) }}</div>
+            <div class="summary-value">Rs. {{ number_format($invoice->total_amount, 2) }}</div>
         </div>
     </div>
 
