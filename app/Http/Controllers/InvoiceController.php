@@ -87,4 +87,19 @@ class InvoiceController extends Controller
             return back()->with('error', 'Failed to generate invoice: ' . $e->getMessage());
         }
     }
+
+    public function destroy(\App\Models\Invoice $invoice)
+    {
+        // Delete associated PDF files from storage
+        if ($invoice->pdf_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($invoice->pdf_path);
+        }
+        if ($invoice->receipt_pdf_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($invoice->receipt_pdf_path);
+        }
+
+        $invoice->delete();
+
+        return back()->with('success', 'Invoice deleted successfully.');
+    }
 }

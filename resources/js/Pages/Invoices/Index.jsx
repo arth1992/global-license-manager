@@ -5,10 +5,21 @@ import { useState } from 'react';
 export default function Index({ auth, invoices, metrics }) {
     const [isReconciliationModalOpen, setIsReconciliationModalOpen] = useState(false);
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [deletingId, setDeletingId] = useState(null);
     
     const { data, setData, post, processing, errors, reset } = useForm({
         transaction_id: ''
     });
+
+    const handleDeleteInvoice = (invoice) => {
+        if (!confirm(`Are you sure you want to permanently delete invoice ${invoice.invoice_number}? This cannot be undone.`)) {
+            return;
+        }
+        setDeletingId(invoice.id);
+        router.delete(route('invoices.destroy', invoice.id), {
+            onFinish: () => setDeletingId(null),
+        });
+    };
 
     const openModal = (invoice) => {
         setSelectedInvoice(invoice);
@@ -98,6 +109,14 @@ export default function Index({ auth, invoices, metrics }) {
                                                             Mark Paid
                                                         </button>
                                                     )}
+                                                    <button
+                                                        onClick={() => handleDeleteInvoice(invoice)}
+                                                        disabled={deletingId === invoice.id}
+                                                        className="text-rose-400 hover:text-rose-300 disabled:opacity-50"
+                                                        title="Delete invoice"
+                                                    >
+                                                        {deletingId === invoice.id ? 'Deleting...' : 'Delete'}
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
     Route::put('/licenses/{license}/billing', [\App\Http\Controllers\InvoiceController::class, 'updateBilling'])->name('licenses.billing.update');
     Route::post('/licenses/{license}/invoices/manual', [\App\Http\Controllers\InvoiceController::class, 'manualGenerate'])->name('licenses.invoices.manual');
+    Route::delete('/invoices/{invoice}', [\App\Http\Controllers\InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
     // System Settings
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
