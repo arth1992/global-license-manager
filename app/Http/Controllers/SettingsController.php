@@ -63,6 +63,7 @@ class SettingsController extends Controller
 
             if ($settings->smtp_host) {
                 config([
+                    'mail.default' => 'smtp',
                     'mail.mailers.smtp.host' => $settings->smtp_host,
                     'mail.mailers.smtp.port' => (int) $settings->smtp_port,
                     'mail.mailers.smtp.username' => $settings->smtp_username,
