@@ -211,7 +211,7 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                     <div>
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custom Base Fee</span>
                                         <p className="text-slate-300 mt-0.5 font-medium">
-                                            {license.base_fee ? `₹${license.base_fee}` : <span className="text-slate-600 text-xs italic">Default (₹2000)</span>}
+                                            {license.base_fee ? `₹${license.base_fee}` : <span className="text-slate-600 text-xs italic">Default (₹5000)</span>}
                                         </p>
                                     </div>
                                     <div>
@@ -522,7 +522,7 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                     type="number"
                                     value={billingData.base_fee}
                                     onChange={(e) => setBillingData('base_fee', e.target.value)}
-                                    placeholder="2000"
+                                    placeholder="5000"
                                     className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 {billingErrors.base_fee && <p className="mt-1 text-xs text-rose-500">{billingErrors.base_fee}</p>}

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class InvoiceService
 {
-    public const BASE_FEE = 2000.00; // INR
+    public const BASE_FEE = 5000.00; // INR
     public const FEE_PER_APPLICANT = 200.00; // INR
 
     public function generateInvoice(License $license, int $activeApplicantCount, int $month, int $year, ?array $schoolBreakdown = null)
