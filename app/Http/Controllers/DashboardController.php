@@ -142,6 +142,16 @@ class DashboardController extends Controller
             'expires_at'   => $license->expires_at ? $license->expires_at->format('Y-m-d H:i') : null,
             'activated_at' => $license->activated_at ? $license->activated_at->format('Y-m-d H:i') : null,
             'is_expired'   => $license->isExpired(),
+            'base_fee'     => $license->base_fee,
+            'per_applicant_fee' => $license->per_applicant_fee,
+            'billing_discount_type' => $license->billing_discount_type,
+            'billing_discount_amount' => $license->billing_discount_amount,
+            'is_billing_waived' => (bool) $license->is_billing_waived,
+            'billing_address' => $license->billing_address,
+            'gstin'        => $license->gstin,
+            'state_code'   => $license->state_code,
+            'state_name'   => $license->state_name,
+            'gst_rate'     => $license->gst_rate,
         ];
 
         $activations = $license->activationRequests->map(function ($req) {

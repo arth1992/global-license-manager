@@ -44,6 +44,11 @@ class InvoiceController extends Controller
             'is_billing_waived' => 'boolean',
             'base_fee' => 'nullable|numeric|min:0',
             'per_applicant_fee' => 'nullable|numeric|min:0',
+            'billing_address' => 'nullable|string',
+            'gstin' => 'nullable|string|max:20',
+            'state_code' => 'nullable|string|max:10',
+            'state_name' => 'nullable|string|max:255',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $license->update([
@@ -52,6 +57,11 @@ class InvoiceController extends Controller
             'is_billing_waived' => $validated['is_billing_waived'] ?? false,
             'base_fee' => $validated['base_fee'] ?? null,
             'per_applicant_fee' => $validated['per_applicant_fee'] ?? null,
+            'billing_address' => $validated['billing_address'] ?? null,
+            'gstin' => $validated['gstin'] ?? null,
+            'state_code' => $validated['state_code'] ?? null,
+            'state_name' => $validated['state_name'] ?? null,
+            'gst_rate' => $validated['gst_rate'] ?? 18.00,
         ]);
 
         return back()->with('success', 'Billing settings updated successfully.');

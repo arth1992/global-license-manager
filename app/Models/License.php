@@ -25,6 +25,11 @@ class License extends Model
         'activated_at',
         'base_fee',
         'per_applicant_fee',
+        'billing_address',
+        'gstin',
+        'state_code',
+        'state_name',
+        'gst_rate',
     ];
 
     protected $casts = [

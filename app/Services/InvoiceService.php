@@ -10,8 +10,8 @@ use Illuminate\Support\Str;
 
 class InvoiceService
 {
-    public const BASE_FEE = 5000.00; // INR
-    public const FEE_PER_APPLICANT = 200.00; // INR
+    public const BASE_FEE = 4999.00; // INR
+    public const FEE_PER_APPLICANT = 199.00; // INR
 
     public function generateInvoice(License $license, int $activeApplicantCount, int $month, int $year, ?array $schoolBreakdown = null)
     {
@@ -43,7 +43,29 @@ class InvoiceService
             $discountAmount = $subtotal * ($discountPercent / 100);
         }
 
-        $totalAmount = max(0, $subtotal - $discountAmount);
+        $taxableAmount = max(0, $subtotal - $discountAmount);
+        
+        $settings = \App\Models\SystemSetting::getActive();
+        $supplierStateCode = $settings->state_code ?: '29';
+        $recipientStateCode = $license->state_code ?: '27';
+        $gstRate = $license->gst_rate ?? 18.00;
+        
+        $cgstAmount = 0;
+        $sgstAmount = 0;
+        $igstAmount = 0;
+        
+        if ($taxableAmount > 0 && !$license->is_billing_waived) {
+            $gstAmount = $taxableAmount * ($gstRate / 100);
+            if ($supplierStateCode === $recipientStateCode) {
+                $cgstAmount = $gstAmount / 2;
+                $sgstAmount = $gstAmount / 2;
+            } else {
+                $igstAmount = $gstAmount;
+            }
+            $totalAmount = $taxableAmount + $gstAmount;
+        } else {
+            $totalAmount = $taxableAmount;
+        }
         
         if ($totalAmount == 0 && !$license->is_billing_waived) {
             $status = 'Paid'; // auto-paid if discount covers everything
@@ -61,6 +83,11 @@ class InvoiceService
             'school_breakdown' => $schoolBreakdown,
             'applicant_fee' => $applicantFee,
             'discount_applied' => $discountAmount,
+            'taxable_amount' => $taxableAmount,
+            'cgst_amount' => $cgstAmount,
+            'sgst_amount' => $sgstAmount,
+            'igst_amount' => $igstAmount,
+            'gst_rate' => $gstRate,
             'total_amount' => $totalAmount,
             'status' => $status,
         ]);

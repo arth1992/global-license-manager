@@ -17,6 +17,10 @@ export default function Index({ auth, settings }) {
         smtp_encryption: settings?.smtp_encryption || '',
         smtp_from_address: settings?.smtp_from_address || '',
         smtp_from_name: settings?.smtp_from_name || '',
+        company_address: settings?.company_address || '',
+        gstin: settings?.gstin || '',
+        state_code: settings?.state_code || '',
+        state_name: settings?.state_name || '',
     });
 
     const [toast, setToast] = useState(null);
@@ -117,6 +121,60 @@ export default function Index({ auth, settings }) {
                                     ></textarea>
                                     <p className="text-xs text-slate-500">This text will be printed at the bottom of all generated invoice PDFs.</p>
                                     {errors.bank_details && <p className="text-sm text-red-500">{errors.bank_details}</p>}
+                                </div>
+
+                                <div className="pt-6 border-t border-slate-850 space-y-6">
+                                    <h4 className="text-md font-bold text-white uppercase tracking-wider text-indigo-400">GST Invoice Settings (Indian Tax Compliance)</h4>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">Supplier GSTIN</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.gstin}
+                                                onChange={e => setData('gstin', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="e.g. 29AAAAA1111A1Z1"
+                                            />
+                                            {errors.gstin && <p className="text-sm text-red-500">{errors.gstin}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">Supplier State Name</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.state_name}
+                                                onChange={e => setData('state_name', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="e.g. Karnataka"
+                                            />
+                                            {errors.state_name && <p className="text-sm text-red-500">{errors.state_name}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">Supplier State Code</label>
+                                            <input 
+                                                type="text" 
+                                                value={data.state_code}
+                                                onChange={e => setData('state_code', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="e.g. 29"
+                                            />
+                                            {errors.state_code && <p className="text-sm text-red-500">{errors.state_code}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-slate-300">Supplier Billing Address</label>
+                                            <textarea 
+                                                rows="2"
+                                                value={data.company_address}
+                                                onChange={e => setData('company_address', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                placeholder="e.g. 123 Tech Park, Indiranagar, Bangalore - 560038"
+                                            ></textarea>
+                                            {errors.company_address && <p className="text-sm text-red-500">{errors.company_address}</p>}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-1">

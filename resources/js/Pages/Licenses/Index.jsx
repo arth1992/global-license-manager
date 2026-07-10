@@ -305,7 +305,7 @@ export default function Index({ licenses, filters }) {
                                                 step="0.01"
                                                 value={data.base_fee}
                                                 onChange={(e) => setData('base_fee', e.target.value)}
-                                                placeholder="Default: 5000"
+                                                placeholder="Default: 4999"
                                                 className="w-full pl-8 pr-3.5 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-slate-600 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                                             />
                                         </div>
@@ -326,7 +326,7 @@ export default function Index({ licenses, filters }) {
                                                 step="0.01"
                                                 value={data.per_applicant_fee}
                                                 onChange={(e) => setData('per_applicant_fee', e.target.value)}
-                                                placeholder="Default: 200"
+                                                placeholder="Default: 199"
                                                 className="w-full pl-8 pr-3.5 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 placeholder-slate-600 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-300"
                                             />
                                         </div>

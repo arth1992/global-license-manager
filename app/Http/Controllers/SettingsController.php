@@ -31,6 +31,10 @@ class SettingsController extends Controller
             'smtp_encryption' => 'nullable|string|max:255',
             'smtp_from_address' => 'nullable|email|max:255',
             'smtp_from_name' => 'nullable|string|max:255',
+            'company_address' => 'nullable|string',
+            'gstin' => 'nullable|string|max:20',
+            'state_code' => 'nullable|string|max:10',
+            'state_name' => 'nullable|string|max:255',
         ]);
 
         $settings = SystemSetting::getActive();

@@ -105,7 +105,16 @@ class BillingApiController extends Controller
             $discountPercent = min($license->billing_discount_amount ?? 0, 100);
             $discountAmount = $baseFee * ($discountPercent / 100);
         }
-        $total = max(0, $baseFee - $discountAmount);
+        $taxable = max(0, $baseFee - $discountAmount);
+
+        $gstRate = $license->gst_rate ?? 18.00;
+        $gstAmount = 0;
+        if ($taxable > 0 && !$license->is_billing_waived) {
+            $gstAmount = $taxable * ($gstRate / 100);
+            $total = $taxable + $gstAmount;
+        } else {
+            $total = $taxable;
+        }
 
         $estimatedBill = [
             'base_fee' => $baseFee,
@@ -113,6 +122,9 @@ class BillingApiController extends Controller
             'applicant_fee' => $perApplicantRate,
             'subtotal' => $baseFee,
             'discount' => $discountAmount,
+            'taxable_amount' => $taxable,
+            'gst_rate' => $gstRate,
+            'gst_amount' => $gstAmount,
             'total' => $total,
         ];
 

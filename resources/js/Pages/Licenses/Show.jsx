@@ -24,6 +24,11 @@ export default function Show({ license, activations, logs, billingLogs }) {
         billing_discount_type: license.billing_discount_type || '',
         billing_discount_amount: license.billing_discount_amount || '',
         is_billing_waived: license.is_billing_waived || false,
+        billing_address: license.billing_address || '',
+        gstin: license.gstin || '',
+        state_code: license.state_code || '',
+        state_name: license.state_name || '',
+        gst_rate: license.gst_rate || '',
     });
 
     const handleCopyKey = () => {
@@ -211,15 +216,49 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                     <div>
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custom Base Fee</span>
                                         <p className="text-slate-300 mt-0.5 font-medium">
-                                            {license.base_fee ? `₹${license.base_fee}` : <span className="text-slate-600 text-xs italic">Default (₹5000)</span>}
+                                            {license.base_fee ? `₹${license.base_fee}` : <span className="text-slate-600 text-xs italic">Default (₹4999)</span>}
                                         </p>
                                     </div>
                                     <div>
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custom Applicant Fee</span>
                                         <p className="text-slate-300 mt-0.5 font-medium">
-                                            {license.per_applicant_fee ? `₹${license.per_applicant_fee}` : <span className="text-slate-600 text-xs italic">Default (₹200)</span>}
+                                            {license.per_applicant_fee ? `₹${license.per_applicant_fee}` : <span className="text-slate-600 text-xs italic">Default (₹199)</span>}
                                         </p>
                                     </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Client GSTIN</span>
+                                        <p className="text-slate-300 mt-0.5 font-medium truncate" title={license.gstin || 'URP'}>
+                                            {license.gstin || <span className="text-slate-600 text-xs italic">URP</span>}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">GST Rate</span>
+                                        <p className="text-slate-300 mt-0.5 font-medium">
+                                            {license.gst_rate ? `${license.gst_rate}%` : '18.00%'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">State Code</span>
+                                        <p className="text-slate-300 mt-0.5 font-mono">
+                                            {license.state_code || <span className="text-slate-600 text-xs italic">N/A</span>}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">State Name</span>
+                                        <p className="text-slate-300 mt-0.5 font-medium">
+                                            {license.state_name || <span className="text-slate-600 text-xs italic">N/A</span>}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Billing Address</span>
+                                    <p className="text-slate-300 mt-0.5 font-medium whitespace-pre-line leading-relaxed">
+                                        {license.billing_address || <span className="text-slate-600 text-xs italic">N/A</span>}
+                                    </p>
                                 </div>
                                 <div>
                                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Enabled Features</span>
@@ -522,7 +561,7 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                     type="number"
                                     value={billingData.base_fee}
                                     onChange={(e) => setBillingData('base_fee', e.target.value)}
-                                    placeholder="5000"
+                                    placeholder="4999"
                                     className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 {billingErrors.base_fee && <p className="mt-1 text-xs text-rose-500">{billingErrors.base_fee}</p>}
@@ -536,10 +575,89 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                     type="number"
                                     value={billingData.per_applicant_fee}
                                     onChange={(e) => setBillingData('per_applicant_fee', e.target.value)}
-                                    placeholder="200"
+                                    placeholder="199"
                                     className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                                 {billingErrors.per_applicant_fee && <p className="mt-1 text-xs text-rose-500">{billingErrors.per_applicant_fee}</p>}
+                            </div>
+                        </div>
+
+                        <div className="border-t border-slate-850 pt-4 mt-4 space-y-4">
+                            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider text-indigo-400">GST Compliance Parameters</h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">
+                                        Client GSTIN
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={billingData.gstin}
+                                        onChange={(e) => setBillingData('gstin', e.target.value)}
+                                        placeholder="e.g. 27AAAAA1111A1Z1"
+                                        className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                    {billingErrors.gstin && <p className="mt-1 text-xs text-rose-500">{billingErrors.gstin}</p>}
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">
+                                        GST Rate (%)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        value={billingData.gst_rate}
+                                        onChange={(e) => setBillingData('gst_rate', e.target.value)}
+                                        placeholder="18.00"
+                                        className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                    {billingErrors.gst_rate && <p className="mt-1 text-xs text-rose-500">{billingErrors.gst_rate}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">
+                                        State Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={billingData.state_name}
+                                        onChange={(e) => setBillingData('state_name', e.target.value)}
+                                        placeholder="e.g. Maharashtra"
+                                        className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                    {billingErrors.state_name && <p className="mt-1 text-xs text-rose-500">{billingErrors.state_name}</p>}
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">
+                                        State Code
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={billingData.state_code}
+                                        onChange={(e) => setBillingData('state_code', e.target.value)}
+                                        placeholder="e.g. 27"
+                                        className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                    {billingErrors.state_code && <p className="mt-1 text-xs text-rose-500">{billingErrors.state_code}</p>}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-400 mb-1">
+                                    Billing Address
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    value={billingData.billing_address}
+                                    onChange={(e) => setBillingData('billing_address', e.target.value)}
+                                    placeholder="e.g. 456 Business Tower, BKC, Mumbai - 400051"
+                                    className="block w-full rounded-md border-slate-700 bg-slate-800 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                {billingErrors.billing_address && <p className="mt-1 text-xs text-rose-500">{billingErrors.billing_address}</p>}
                             </div>
                         </div>
 
