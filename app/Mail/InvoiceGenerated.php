@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class InvoiceGenerated extends Mailable
+class InvoiceGenerated extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -29,6 +29,23 @@ class InvoiceGenerated extends Mailable
      */
     public function envelope(): Envelope
     {
+        // Apply dynamic SMTP settings if available in system settings
+        $settings = \App\Models\SystemSetting::getActive();
+        if ($settings->smtp_host) {
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp.host' => $settings->smtp_host,
+                'mail.mailers.smtp.port' => (int) $settings->smtp_port,
+                'mail.mailers.smtp.username' => $settings->smtp_username,
+                'mail.mailers.smtp.password' => $settings->smtp_password,
+                'mail.mailers.smtp.encryption' => $settings->smtp_encryption === 'none' ? null : $settings->smtp_encryption,
+                'mail.from.address' => $settings->smtp_from_address,
+                'mail.from.name' => $settings->smtp_from_name ?: config('mail.from.name'),
+            ]);
+
+            app('mail.manager')->forgetMailers();
+        }
+
         return new Envelope(
             subject: 'Invoice Generated - ' . $this->invoice->invoice_number,
         );

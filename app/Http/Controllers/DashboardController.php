@@ -189,11 +189,29 @@ class DashboardController extends Controller
             ];
         });
 
+        $usageLogs = \App\Models\BillingUsageLog::where('license_id', $license->id)
+            ->latest()
+            ->take(20)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id'                     => $log->id,
+                    'active_applicant_count' => $log->active_applicant_count,
+                    'sync_month'             => $log->sync_month,
+                    'sync_year'              => $log->sync_year,
+                    'sync_period'            => sprintf('%02d/%d', $log->sync_month, $log->sync_year),
+                    'status'                 => $log->status,
+                    'error_message'          => $log->error_message ? substr($log->error_message, 0, 150) : null,
+                    'created_at'             => $log->created_at ? $log->created_at->format('Y-m-d H:i') : 'Just now',
+                ];
+            });
+
         return Inertia::render('Licenses/Show', [
             'license'     => $formattedLicense,
             'activations' => $activations,
             'logs'        => $logs,
             'billingLogs' => $billingLogs,
+            'usageLogs'   => $usageLogs,
         ]);
     }
 

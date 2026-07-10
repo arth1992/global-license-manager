@@ -50,8 +50,7 @@
             <div style="margin-top: 15px; font-size: 12px; line-height: 1.6;">
                 <strong>Invoice #:</strong> {{ $invoice->invoice_number }}<br>
                 <strong>Date:</strong> {{ $date }}<br>
-                <strong>Due Date:</strong> {{ $dueDate }}<br>
-                <strong>Status:</strong> <span class="status status-{{ $invoice->status }}">{{ $invoice->status }}</span>
+                <strong>Due Date:</strong> {{ $dueDate }}
             </div>
         </div>
     </div>
@@ -161,7 +160,7 @@
             <strong>Bank Transfer Details:</strong><br>
             {!! nl2br(e($bankDetails)) !!}<br><br>
         @endif
-        Subject to Bangalore Jurisdiction. This is a computer-generated tax invoice and does not require signature.<br>
+        This is a computer-generated tax invoice and does not require signature.<br>
         Thank you for your business!
     </div>
 </body>

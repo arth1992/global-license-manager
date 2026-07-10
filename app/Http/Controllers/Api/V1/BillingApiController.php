@@ -18,7 +18,7 @@ class BillingApiController extends Controller
         return License::where('fingerprint', $fingerprint)->first();
     }
 
-    public function syncUsage(Request $request, InvoiceService $invoiceService)
+    public function syncUsage(Request $request)
     {
         $validated = $request->validate([
             'domain' => 'required|string',
@@ -36,26 +36,35 @@ class BillingApiController extends Controller
         }
 
         try {
-            $invoice = $invoiceService->generateInvoice(
-                $license,
-                $validated['active_applicant_count'],
-                $validated['sync_month'],
-                $validated['sync_year'],
-                $validated['school_breakdown'] ?? null
+            $log = \App\Models\BillingUsageLog::updateOrCreate(
+                [
+                    'license_id' => $license->id,
+                    'sync_month' => $validated['sync_month'],
+                    'sync_year' => $validated['sync_year'],
+                ],
+                [
+                    'active_applicant_count' => $validated['active_applicant_count'],
+                    'school_breakdown' => $validated['school_breakdown'] ?? null,
+                    'status' => 'pending',
+                    'error_message' => null,
+                ]
             );
+
+            // Dispatch background queue job
+            \App\Jobs\ProcessClientBillingJob::dispatch($log);
 
             \App\Models\BillingLog::create([
                 'license_id' => $license->id,
                 'status' => 'success',
-                'notes' => "Auto-synced {$validated['active_applicant_count']} applicants",
+                'notes' => "Auto-synced {$validated['active_applicant_count']} applicants (Queued)",
                 'sync_month' => $validated['sync_month'],
                 'sync_year' => $validated['sync_year'],
             ]);
 
             return response()->json([
-                'message' => 'Billing usage synced and invoice generated.',
-                'invoice' => $invoice
-            ]);
+                'message' => 'Billing usage synced and queued for processing.',
+                'log' => $log
+            ], 202);
         } catch (\Exception $e) {
             \App\Models\BillingLog::create([
                 'license_id' => $license->id,

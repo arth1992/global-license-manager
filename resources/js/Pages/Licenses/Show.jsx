@@ -3,7 +3,7 @@ import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 import Modal from '@/Components/Modal';
 
-export default function Show({ license, activations, logs, billingLogs }) {
+export default function Show({ license, activations, logs, billingLogs, usageLogs }) {
     const [copied, setCopied] = useState(false);
     const [updatingStatus, setUpdatingStatus] = useState(false);
     const [resettingLicense, setResettingLicense] = useState(false);
@@ -536,6 +536,68 @@ export default function Show({ license, activations, logs, billingLogs }) {
                                     <tr>
                                         <td colSpan="4" className="text-center py-6 text-slate-600 text-xs italic">
                                             No billing logs recorded for this license.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Background Queue Sync Jobs */}
+                <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 shadow-sm overflow-hidden mb-12">
+                    <div className="border-b border-slate-800 bg-slate-900/50 px-6 py-4">
+                        <h3 className="font-bold text-white text-base">Background Queue Sync Jobs</h3>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            Status of asynchronously queued billing processing tasks initiated by client usage sync reports.
+                        </p>
+                    </div>
+                    <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-800 bg-slate-900/30 text-xs font-bold uppercase tracking-wider text-slate-400">
+                                    <th className="px-6 py-3">Timestamp</th>
+                                    <th className="px-6 py-3">Sync Period</th>
+                                    <th className="px-6 py-3">Active Applicants</th>
+                                    <th className="px-6 py-3">Status</th>
+                                    <th className="px-6 py-3">Error / Details</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800">
+                                {usageLogs && usageLogs.length > 0 ? (
+                                    usageLogs.map((log) => (
+                                        <tr key={log.id} className="text-xs text-slate-300 transition-all hover:bg-slate-850/10">
+                                            <td className="px-6 py-3 text-slate-400 font-mono">
+                                                {log.created_at}
+                                            </td>
+                                            <td className="px-6 py-3 font-mono text-slate-400">
+                                                {log.sync_period}
+                                            </td>
+                                            <td className="px-6 py-3 font-semibold text-slate-200">
+                                                {log.active_applicant_count}
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold border ${
+                                                    log.status === 'completed'
+                                                        ? 'bg-emerald-950/40 border-emerald-800 text-emerald-455'
+                                                        : log.status === 'processing'
+                                                        ? 'bg-amber-950/40 border-amber-800 text-amber-400'
+                                                        : log.status === 'failed'
+                                                        ? 'bg-rose-950/40 border-rose-800 text-rose-400'
+                                                        : 'bg-slate-850 border-slate-700 text-slate-400'
+                                                }`}>
+                                                    {log.status.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3 truncate max-w-[300px] text-slate-400 font-mono text-[10px]" title={log.error_message}>
+                                                {log.error_message || <span className="text-slate-600 italic">None</span>}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="text-center py-6 text-slate-650 text-xs italic">
+                                            No asynchronous billing queue tasks recorded.
                                         </td>
                                     </tr>
                                 )}
